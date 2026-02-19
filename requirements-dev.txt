@@ -1,0 +1,16 @@
+# --- DATA SCIENCE & EDA (Notebooks) ---
+jupyter
+pandas
+numpy
+scikit-learn
+matplotlib
+seaborn
+joblib
+
+# --- BACKEND (API) ---
+fastapi
+uvicorn
+
+# --- FRONTEND (Web) ---
+streamlit
+request

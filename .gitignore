@@ -1,0 +1,23 @@
+# Entornos virtuales y variables de entorno
+venv/
+env/
+.venv/
+.env
+
+# Archivos compilados de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# Archivos del Sistema Operativo
+.DS_Store
+Thumbs.db
+
+# Datos (¡Súper importante para no subir el CSV pesado!)
+data/
+
+# Modelos guardados (opcional, por si luego pesan mucho)
+# models/*.joblib

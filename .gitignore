@@ -20,4 +20,4 @@ Thumbs.db
 data/
 
 # Modelos guardados (opcional, por si luego pesan mucho)
-# models/*.joblib
+*.joblib

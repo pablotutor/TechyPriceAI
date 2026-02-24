@@ -6,11 +6,17 @@ scikit-learn
 matplotlib
 seaborn
 joblib
+lightgbm
+xgboost
 
 # --- BACKEND (API) ---
 fastapi
 uvicorn
+pydantic
 
 # --- FRONTEND (Web) ---
 streamlit
-request
+requests
+folium
+streamlit-folium
+geopy

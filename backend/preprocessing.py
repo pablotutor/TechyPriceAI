@@ -183,13 +183,43 @@ def prepare_for_modeling(df_clean: pd.DataFrame) -> pd.DataFrame:
     feed the model our data in the right format.
     """
     df_model = df_clean.copy()
+    
+    # Listing url as index
+    if 'listing_url' in df_model.columns:
+        df_model = df_model.set_index('listing_url')
 
-    # 1. Eliminar ruido de alta cardinalidad (Solo servían para el EDA)
-    cols_to_drop = ['property_type', 'neighbourhood_cleansed']
+    # ==========================================
+    # 0. Dates treatment (Dates -> Integers)
+    # ==========================================
+    date_cols = ['host_since', 'first_review', 'last_review']
+    
+    # Today's date as reference
+    reference_date = pd.to_datetime('today') 
+    
+    for col in date_cols:
+        if col in df_model.columns:
+            # Force dates
+            df_model[col] = pd.to_datetime(df_model[col], errors='coerce')
+            
+            # Calculate days of difference
+            df_model[f'days_since_{col}'] = (reference_date - df_model[col]).dt.days
+            
+            # If null -> fillna with -1
+            df_model[f'days_since_{col}'] = df_model[f'days_since_{col}'].fillna(-1).astype(int)
+            
+            # Drop the original column
+            df_model = df_model.drop(columns=[col])
+
+    # ==========================================
+    # 1. Drop noise and non-predictive columns
+    # ==========================================
+    cols_to_drop = ['property_type', 'neighbourhood_cleansed'] 
     present_cols = [c for c in cols_to_drop if c in df_model.columns]
     df_model = df_model.drop(columns=present_cols)
 
+    # ==========================================
     # 2. Ordinal Encoding: host_response_time
+    # ==========================================
     response_map = {
         'Unknown': 0,
         'a few days or more': 1,
@@ -200,12 +230,52 @@ def prepare_for_modeling(df_clean: pd.DataFrame) -> pd.DataFrame:
     if 'host_response_time' in df_model.columns:
         df_model['host_response_time'] = df_model['host_response_time'].map(response_map).fillna(0).astype(int)
 
+    # ==========================================
     # 3. One-Hot Encoding (Dummy Variables)
+    # ==========================================
     cols_to_dummy = ['neighbourhood_group_cleansed', 'room_type']
     present_dummies = [c for c in cols_to_dummy if c in df_model.columns]
     
     if present_dummies:
-        # drop_first=True
-        df_model = pd.get_dummies(df_model, columns=present_dummies, drop_first=True)
+        # EL TRUCO: dtype=int fuerza que salgan 0 y 1 en lugar de False y True
+        df_model = pd.get_dummies(df_model, columns=present_dummies, drop_first=True, dtype=int)
+        
+    # ==========================================
+    # 4. Feature engineering (GEOSPATIAL)
+    # ==========================================
+    if 'latitude' in df_clean.columns and 'longitude' in df_clean.columns:
+        # Key coordinates in Madrid
+        madrid_pois = {
+            #'sol': (40.4168, -3.7038),          # Center
+            'bernabeu': (40.4530, -3.6883),      # Real Madrid / Finance zone
+            'metropolitano': (40.4361, -3.5995), # Atlético de Madrid
+            'atocha': (40.4065, -3.6908),        # Train principal station (AVE)
+            'aeropuerto': (40.4839, -3.5680)     # Barajas Airport
+        }
+        
+        # Calculate distance to each apartment
+        for poi_name, coords in madrid_pois.items():
+            poi_lat, poi_lon = coords
+            df_clean[f'distance_to_{poi_name}_km'] = calculate_haversine_distance(
+                df_clean['latitude'], 
+                df_clean['longitude'], 
+                poi_lat, 
+                poi_lon
+            )
+        
+    # ==========================================
+    # 5. Feature engineering
+    # ==========================================
+    # 1. Index of luxury (Bathrooms per person)
+    if 'bathrooms' in df_model.columns and 'accommodates' in df_model.columns:
+        df_model['bathrooms_per_person'] = df_model['bathrooms'] / df_model['accommodates'].replace(0, 1)
+        
+    # 2. Index of aglomeration (Accomodates per bed)
+    if 'accommodates' in df_model.columns and 'beds' in df_model.columns:
+        df_model['accommodates_per_bed'] = df_model['accommodates'] / df_model['beds'].replace(0, 1)
+        
+    # 3. Proxy of demand (Occupancy rate in 30 days)
+    if 'availability_30' in df_model.columns:
+        df_model['occupancy_rate_30d'] = (30 - df_model['availability_30']) / 30
 
     return df_model

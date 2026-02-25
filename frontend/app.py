@@ -35,7 +35,8 @@ if "predicted_price" not in st.session_state:
     st.session_state.predicted_price = None
 
 # Carga de recursos globales (API, Mapa, GeoJSON)
-API_URL = "http://127.0.0.1:8000/predict"
+import os
+API_URL = os.getenv("API_URL", "http://127.0.0.1:8000/predict")
 geolocator = Nominatim(user_agent="airbnb_pricer_madrid_app")
 
 current_dir = os.path.dirname(os.path.abspath(__file__))

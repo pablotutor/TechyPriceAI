@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: techyprice_backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      # Si el backend necesita leer datos de ../data, descomenta la siguiente línea:
+      # - ./data:/data
+
+  frontend:
+    build: ./frontend
+    container_name: techyprice_frontend
+    ports:
+      - "8501:8501"
+    environment:
+      # 🚨 AQUÍ ESTÁ LA MAGIA: Le decimos que busque a FastAPI por el nombre del contenedor
+      - API_URL=http://techyprice_backend:8000/predict
+    volumes:
+      - ./frontend:/app/frontend
+      # 🚨 VITAL: Montamos la carpeta data para que Streamlit encuentre los CSV y el mapa
+      - ./data:/app/data
+    depends_on:
+      - backend

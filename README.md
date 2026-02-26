@@ -49,6 +49,8 @@ techyprice-ai/
 ├── docker-compose.yml     # Multi-container orchestration
 └── README.md              # Project documentation
 
+```
+
 ## 🚀 How to Run (Docker Compose)
 
 Because this project uses a decoupled architecture, we use `docker-compose` to spin up both the Backend API and the Frontend Dashboard simultaneously.

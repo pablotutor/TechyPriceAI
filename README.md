@@ -9,20 +9,23 @@
 ## 💼 Business Problem
 In the short-term rental market (e.g., Airbnb, Booking), pricing asymmetry affects both sides of the marketplace:
 1. **For Hosts:** Setting a price too high results in empty calendars, while setting it too low leaves money on the table. They lack real-time, data-driven pricing tools.
-2. **For Guests:** Tourists and renters struggle to identify true bargains in a saturated market, often not knowing if a listing is heavily overpriced or a hidden gem.
+2. **For Guests & Investors:** Tourists and real estate investors struggle to identify true bargains in a saturated market, often not knowing if a listing is heavily overpriced or a hidden gem ripe for investment.
 
 ## 🎯 The Solution
 **TechyPrice AI** is a Two-Sided Machine Learning system designed to bring transparency to the real estate market. 
 
-* **🧠 Core Engine:** Calculates the "Fair Market Price" (Optimal nightly rate) for any property in Madrid using an advanced XGBoost Regression model and Geospatial Analytics.
+* **🧠 Core Engine (Stacking Ensemble):** Calculates the "Fair Market Price" (Optimal nightly rate) for any property using a **Stacking Machine Learning architecture**. Instead of relying on a single algorithm, our system trains multiple base models (like Random Forest, LightGBM, and XGBoost) and uses a "Meta-Learner" (Linear Regression) to intelligently weigh their predictions, resulting in highly accurate and robust valuations.
+
+
+
 * **🏠 Host Mode (Price Simulator):** An interactive interface for landlords to play with property parameters (bedrooms, amenities, location) and see how renovations impact their potential revenue.
-* **🕵️ Guest Mode (Bargain Hunter):** A filtering engine that scans current listings, compares the *Actual Price* vs. the AI's *Predicted Price*, and ranks properties by their "Opportunity Score" (finding the most underpriced gems).
+* **🕵️ Investor Mode (Bargain Hunter):** A filtering engine that scans current listings, compares the *Actual Price* vs. the AI's *Predicted Price*, and highlights properties with the highest "Opportunity Score" (Residual Value).
 
 ## 🏗️ Architecture & Tech Stack
 Unlike monolithic applications, this project follows a **Decoupled Microservices Architecture**, separating the Machine Learning inference engine from the user interface.
 
-* **Data Processing:** Pandas, GeoPandas & Scikit-Learn Pipelines.
-* **Model:** Supervised Regression (XGBoost / Random Forest Regressor).
+* **Data Processing:** Pandas, GeoPandas & Scikit-Learn.
+* **Model:** Supervised Regression (Stacking Ensemble).
 * **Backend/API (The Brain):** FastAPI (A lightweight, lightning-fast REST API to serve the ML model).
 * **Frontend (The Face):** Streamlit (Interactive Dashboard for the end-user with Geospatial Heatmaps).
 * **Containerization:** Docker & Docker Compose (Orchestrating multiple containers seamlessly).
@@ -33,19 +36,18 @@ Unlike monolithic applications, this project follows a **Decoupled Microservices
 techyprice-ai/
 ├── data/                  # Raw and processed datasets (Git ignored)
 ├── notebooks/             # EDA, Feature Engineering & Modeling (Jupyter)
-├── models/                # Serialized trained models (.joblib)
 ├── backend/               # FastAPI Microservice
+│   ├── models/            # Serialized trained models (.joblib)
 │   ├── main.py            # API routing and model inference logic
 │   ├── requirements.txt   # Backend dependencies
 │   └── Dockerfile         # Backend container config
 ├── frontend/              # Streamlit Application
+│   ├── assets/            # UI Images, logos, and styling assets
 │   ├── app.py             # UI and API connection logic
 │   ├── requirements.txt   # Frontend dependencies
 │   └── Dockerfile         # Frontend container config
 ├── docker-compose.yml     # Multi-container orchestration
 └── README.md              # Project documentation
-
-```
 
 ## 🚀 How to Run (Docker Compose)
 
@@ -63,23 +65,25 @@ docker-compose up --build
 * **Frontend Dashboard:** Open your browser at `http://localhost:8501`
 * **Backend API Docs (Swagger UI):** Open your browser at `http://localhost:8000/docs`
 
-## 🔮 Roadmap & Future Improvements
+## 🔮 Roadmap & Future Improvements (v2.0 & Beyond)
 
-Currently in early development. The following features are planned for v2.0:
+We are actively scaling TechyPrice AI from a data science project into a full-fledged SaaS product.
 
-### 1. Advanced Feature Engineering
+### 1. Advanced AI & Agentic Workflows 🤖
 
-* **Amenity NLP:** Extract and process keyword tags from the property description (e.g., "Rooftop", "Jacuzzi") using NLP techniques to measure emotional premium.
-* **Time-Series Seasonality:** Integrate Prophet to adjust the baseline "Fair Price" based on the month of the year or local events (e.g., Champions League final in Madrid).
+* **Computer Vision "AI Appraisers":** Implement a multi-agent system where a specialized Computer Vision agent analyzes listing photos to score interior design quality and view aesthetics (e.g., "Does a view of the Royal Palace justify a 15% premium?").
+* **National Expansion & Meta-Routing:** Train a generalized baseline model for the entire country (Spain) alongside highly specialized models for major cities. A routing agent will automatically direct API requests to the most accurate model based on coordinates.
 
-### 2. Market Intelligence Dashboard
+### 2. Platform Scalability & Monetization 💳
 
-* **Dynamic Hexagon Heatmaps:** Upgrade the standard map to an interactive `pydeck` H3 hexagon map to visualize average opportunity scores across different micro-neighborhoods.
+* **Next.js Migration:** Rebuild the Streamlit frontend using Next.js/React to create a highly scalable, SEO-friendly web application with user authentication (Stripe integration for SaaS monetization).
+* **PostgreSQL Database Migration:** Move away from static CSV files to a robust relational database (PostgreSQL + PostGIS for spatial queries) to handle daily dynamic data streams efficiently.
 
-### 3. Continuous Integration / MLOps
+### 3. UX Automation & Business Intelligence 📈
 
-* **Automated Retraining:** Script a pipeline to download fresh data from InsideAirbnb monthly and retrain the model if performance degrades (Data Drift).
-* **Cloud Deployment:** Deploy the Docker Compose cluster to AWS (EC2/ECS) or Google Cloud Run for public access.
+* **1-Click Host Auto-Fill:** Allow hosts to simply paste their existing Airbnb URL. A backend scraper will automatically fetch all property features, photos, and amenities to feed the simulator instantly.
+* **Competitor Price Tracking:** Alert hosts if similar nearby listings drop their prices.
+* **Investor ROI Calculator:** Integrate real-time mortgage interest rates and estimated renovation costs into the Bargain Hunter to provide exact payback periods (Cap Rate & ROI) for real estate investors.
 
 ---
 
